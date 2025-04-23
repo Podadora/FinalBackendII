@@ -1,80 +1,79 @@
-## ⚙️ Funcionalidades desarrolladas en esta entrega
+#  Proyecto Ecommerce - Backend | Entrega Final
 
-<<<<<<< HEAD
-Esta entrega implementa un sistema completo de **autenticación y autorización de usuarios** mediante **JWT**, **Passport** y **cookies**.
+Este proyecto representa el backend de un ecommerce desarrollado en Node.js, utilizando Express, MongoDB y una arquitectura profesional con DAO, DTO, Repositories, autenticación con JWT y autorización con roles.
 
-### Funciones principales:
+---
 
-✅ **Registro de usuarios** → `POST /api/sessions/register`  
-Crea un nuevo usuario con contraseña encriptada utilizando **bcrypt**  
-Valida que el email no exista previamente  
-Asocia un carrito vacío al usuario y asigna el rol por defecto (`user`)  
+##  Tecnologías principales
 
-✅ **Login con JWT** → `POST /api/sessions/login`  
-Verifica credenciales con validación de contraseña hasheada  
-Si son correctas, genera un **token JWT**  
-Devuelve el token alojado en una **cookie segura** (`jwtCookie`)  
+- Node.js + Express
+- MongoDB + Mongoose
+- Passport + JWT
+- Bcrypt (hash de contraseñas)
+- dotenv (variables de entorno)
+- Postman (para pruebas de endpoints)
 
-✅ **Ruta protegida `/current`** → `GET /api/sessions/current`  
-Extrae el token JWT desde la cookie  
-Autentica al usuario con estrategia **JWT** de Passport  
-Devuelve los datos del usuario autenticado  
+---
 
-**Todas las rutas son testeables desde Postman**  
-**Archivo Auth JWT Ecommerce.postman_collection para importar**  
+##  Funcionalidades implementadas
 
+###  Autenticación y Autorización
 
+- ✅ Registro de usuarios (`POST /api/sessions/register`)
+  - Contraseña hasheada con bcrypt
+  - Asigna rol `user` por defecto (o `admin` si el email lo requiere)
+  - Se crea un carrito automáticamente al registrarse
 
-```plaintext
-=======
-Funciones principales:
-✅ Registro de usuarios → POST /api/sessions/register
+- ✅ Login con JWT (`POST /api/sessions/login`)
+  - Verifica credenciales
+  - Genera y guarda token en cookie `jwtCookie`
 
-Crea un nuevo usuario con contraseña encriptada utilizando bcrypt
+- ✅ Ruta protegida `/current` (`GET /api/sessions/current`)
+  - Extrae el token desde la cookie y devuelve los datos del usuario autenticado (DTO)
 
-Valida que el email no exista previamente
+- Middleware de autorización por rol (`authorizeRoles`)
+  - Solo `admin` puede crear/editar/eliminar productos
+  - Solo `user` puede agregar productos al carrito o realizar compras
 
-Asocia un carrito vacío al usuario y asigna el rol por defecto (user)
+---
 
-✅ Login con JWT → POST /api/sessions/login
+## 🛒 Carrito
 
-Verifica credenciales con validación de contraseña hasheada
+- ✅ Cada usuario tiene **1 solo carrito activo**
+- ✅ El carrito se crea al registrarse
+- ✅ Un nuevo carrito solo se puede crear si se borra o finaliza la compra del anterior
 
-Si son correctas, genera un token JWT
+#### Endpoints principales
 
-Devuelve el token alojado en una cookie segura (jwtCookie)
+- GET /api/carts/:cid → Obtener carrito por ID
+- POST /api/carts → Crear nuevo carrito (si no tiene uno)
+- POST /api/carts/:cid/products/:pid → Agregar producto al carrito
+- PUT /api/carts/:cid → Reemplazar productos del carrito
+- DELETE /api/carts/:cid → Vaciar carrito
+- DELETE /api/carts/:cid/products/:pid → Eliminar producto específico
+- POST /api/carts/:cid/purchase → Finalizar compra y generar ticket
 
-✅ Ruta protegida /current → GET /api/sessions/current
+## 🛍️ Productos
 
-Extrae el token JWT desde la cookie
+- CRUD completo de productos
+- Paginación, filtrado y ordenamiento (`GET /api/products`)
+- Solo `admin` puede crear, actualizar o eliminar productos
 
-Autentica al usuario con estrategia jwt de Passport
+#### Endpoints principales
 
-Devuelve los datos del usuario autenticado
+- GET /api/products → Obtener productos con paginación
+- GET /api/products/:pid → Obtener producto por ID
+- POST /api/products → Crear producto (admin)
+- PUT /api/products/:pid → Editar producto (admin)
+- DELETE /api/products/:pid → Eliminar producto (admin)
 
-💡 Todas las rutas son testeables desde Postman.
-No es necesario contar con interfaz visual para esta entrega.
+## 🎟️ Tickets de compra
 
-📁 Archivos relevantes para la entrega
-⚠️ IMPORTANTE: Los archivos que no llevan el ícono ✅ no son requeridos para esta entrega, pero forman parte de la estructura general del proyecto.
-No es necesario chequearlos para corregir.
+- Al finalizar una compra, se genera un ticket con:
+  - Código único
+  - Monto total
+  - Fecha de compra
+  - Email del comprador
 
-├── config/
-│   └── passport.js            ✅ Configuración de Passport con JWT
-├── models/
-│   ├── cart.js                Modelo de carrito
-│   ├── product.js             Modelo de producto
-│   └── user.js                ✅ Modelo de usuario con hashing y validaciones
-├── routes/
-│   ├── carts.js               Rutas de carritos
-│   ├── products.js            Rutas de productos
-│   ├── sessions.js            ✅ Rutas de autenticación y JWT
-│   └── views.js               Rutas para vistas (no utilizadas en esta entrega)
-├── utils/
-│   └── hash.js                ✅ Funciones de hash y comparación de contraseñas
-├── views/                     Vistas con Handlebars (no necesarias para esta entrega)
-├── public/                    Archivos estáticos (no necesarios para esta entrega)
-├── .gitignore
-├── app.js                     ✅ App principal con configuración de rutas y middlewares
-├── package.json
-├── README.md
+-  Los productos sin stock suficiente no se procesan
+-  El carrito del usuario se limpia automáticamente después de la compra
